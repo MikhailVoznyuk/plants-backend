@@ -1,9 +1,13 @@
 from fastapi import FastAPI
 from app.routers.infer import router as infer_router
 from app.routers.debug import router as debug_router
-
+from fastapi.staticfiles import StaticFiles
+from app import config
 
 app = FastAPI(title="tree-health-infer-service", version="0.1.0")
+
+app.mount("/artifacts", StaticFiles(directory=config.OUT_DIR), name="artifacts")
+
 
 @app.get("/health")
 def health():
