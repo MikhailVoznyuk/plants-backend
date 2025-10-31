@@ -1,0 +1,2 @@
+id,cls,conf,x1,y1,x2,y2,area,plant_id,area_ratio,severity
+1,crack,0.8,480,640,600,800,19481,1,0.06054569131363109,medium

@@ -1,0 +1,2 @@
+id,cls,conf,x1,y1,x2,y2,area,plant_id,area_ratio,severity
+1,fungus,0.3,420,280,859,699,16764,1,0.016044208666590738,low

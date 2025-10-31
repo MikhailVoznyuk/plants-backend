@@ -1,0 +1,46 @@
+version: "3.9"
+services:
+  treehealth:
+    build:
+      context: .
+      dockerfile: Dockerfile.gpu
+    image: treehealth-gpu:latest
+
+    # для обычного docker compose (не Swarm)
+    gpus: all
+    # runtime: nvidia  # не нужен, не используем
+
+    env_file: .env
+    environment:
+      # переопределяем железо явно, чтобы не зависеть от .env
+      DEVICE: cuda:0
+
+      # species (TorchScript)
+      SPECIES_TS: /models/species/model_ts.pt
+      SPECIES_CLASSES: /models/species/classes.json
+      SPECIES_RU_MAP: /models/species/species_ru_map.json
+      SPECIES_IMG_SIZE: "384"
+
+    volumes:
+      - ./weights:/weights:ro
+      - ./rules:/rules:ro
+      - ./models:/models:ro
+      - ./data:/data
+
+    ports:
+      - "8000:8000"
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+    command: >
+      gunicorn app.main:app -k uvicorn.workers.UvicornWorker
+      --bind 0.0.0.0:8000
+      --workers 1
+      --timeout 1200
+      --graceful-timeout 1200

@@ -1,0 +1,31 @@
+FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 python3-pip python3-venv \
+    git \
+    libgl1 \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /srv/app
+
+COPY requirements.txt .
+
+RUN pip3 install --no-cache-dir --upgrade pip
+RUN pip3 install --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cu121 \
+    torch==2.4.0 torchvision==0.19.0
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+RUN useradd -ms /bin/bash appuser && chown -R appuser:appuser /srv/app
+USER appuser
+
+EXPOSE 8000
+ENV NVIDIA_VISIBLE_DEVICES=all NVIDIA_DRIVER_CAPABILITIES=compute,utility
+CMD ["gunicorn","-k","uvicorn.workers.UvicornWorker","--workers","1","--timeout","1200","--graceful-timeout","1200","--bind","0.0.0.0:8000","app.main:app"]

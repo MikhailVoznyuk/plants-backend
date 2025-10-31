@@ -1,0 +1,2 @@
+id,cls,conf,x1,y1,x2,y2,area,tilt_deg,dry_ratio,species,health_score,health_grade
+1,tree,0.9,240,214,720,1066,82048035,0.0,0.353,unknown,86.7,good

@@ -1,0 +1,28 @@
+{
+  "request_id": "5c9baa7f-a39e-486f-8c6d-2d7be9219d6e",
+  "plants": [
+    {
+      "id": 1,
+      "cls": "tree",
+      "conf": 0.3,
+      "bbox": {
+        "x1": 0,
+        "y1": 0,
+        "x2": 639,
+        "y2": 479
+      },
+      "area": 307200,
+      "tilt_deg": 0.0,
+      "dry_ratio": 0.0,
+      "species": null,
+      "mask_rle": "1 307200",
+      "health_score": 100.0,
+      "health_grade": "good",
+      "species_latin": null,
+      "species_russian": null,
+      "species_conf": 0.0,
+      "species_topk": []
+    }
+  ],
+  "defects": []
+}

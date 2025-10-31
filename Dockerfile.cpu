@@ -1,0 +1,39 @@
+FROM python:3.10-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
+# НУЖЕН git для torch.hub (MiDaS)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    libgl1 \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /srv/app
+
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
+
+# кэш для torch hub, доступный рантайму
+ENV TORCH_HOME=/opt/torch_cache
+RUN mkdir -p /opt/torch_cache
+
+# префетчим MiDaS веса и трансформы в образ
+RUN python - <<'PY'
+import torch
+torch.hub.set_dir('/opt/torch_cache')
+torch.hub.load('intel-isl/MiDaS','DPT_Hybrid', trust_repo=True)
+torch.hub.load('intel-isl/MiDaS','transforms',   trust_repo=True)
+PY
+
+COPY . .
+
+RUN useradd -ms /bin/bash appuser && chown -R appuser:appuser /srv/app /opt/torch_cache
+USER appuser
+
+EXPOSE 8000
+CMD ["gunicorn","-k","uvicorn.workers.UvicornWorker","--workers","1","--timeout","1200","--graceful-timeout","1200","--bind","0.0.0.0:8000","app.main:app"]
